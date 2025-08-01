@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Afbeelding Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 400px;
+      height: auto;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    textarea {
+      max-height: 300px;
+      resize: vertical;
+      overflow-y: auto;
+    }
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    button[type="submit"] {
+      background: #3498db;
+      color: white;
+    }
+    button[type="submit"]:hover {
+      background: #2980b9;
+    }
+    #downloadBtn {
+      background: #27ae60;
+      color: white;
+    }
+    #downloadBtn:hover {
+      background: #1e874b;
+    }
+    canvas {
+      display: none;
+    }
+    #downloadMessage {
+      margin-top: 10px;
+      font-size: 14px;
+      color: green;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Afbeelding Generator</h1>
+
+    <form id="imageForm">
+      <label for="category">Categorie:</label>
+      <select id="category" name="category">
+        <option value="Seinwezen">Seinwezen</option>
+        <option value="Kabels en Leidingen">Kabels en Leidingen</option>
+        <option value="Baan">Baan</option>
+      </select>
+
+      <label for="customText">Tekst:</label>
+      <textarea id="customText" name="customText" rows="4" placeholder="Voer hier je tekst in..."></textarea>
+
+      <label for="position">Tekstpositie:</label>
+      <select id="position" name="position">
+        <option value="Midden" selected>Midden</option>
+        <option value="Boven">Boven</option>
+        <option value="Onder">Onder</option>
+      </select>
+
+      <button type="submit">Genereer Afbeelding</button>
+      <button type="button" id="downloadBtn">Download Afbeelding</button>
+      <p id="downloadMessage"></p>
+    </form>
+  </div>
+
+  <canvas id="canvas" width="220" height="145"></canvas>
+
+  <script>
+    const categoryStyles = {
+      "Seinwezen": {
+        font: "000000",
+        background: "F2CB05",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/seinwezen-24.png"
+      },
+      "Kabels en Leidingen": {
+        font: "ffffff",
+        background: "D91E1E",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/kabels-en-leidingen.png"
+      },
+      "Baan": {
+        font: "ffffff",
+        background: "BF04B3",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Ballast_1.png"
+      }
+    };
+
+    function drawOnCanvas(text, imageUrl, fontColor, backgroundColor, position, callback) {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (backgroundColor) {
+        ctx.fillStyle = `#${backgroundColor}`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      const drawText = () => {
+        if (text.trim() !== "") {
+          ctx.fillStyle = `#${fontColor}`;
+          ctx.font = "20px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+
+          const lines = text.split('\n');
+          const lineHeight = 22;
+          let startY;
+
+          if (position === "Boven") {
+            startY = 10;
+          } else if (position === "Midden") {
+            startY = (canvas.height - lines.length * lineHeight) / 2;
+          } else if (position === "Onder") {
+            startY = canvas.height - lines.length * lineHeight - 10;
+          }
+
+          lines.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+          });
+        }
+
+        if (callback) callback(canvas.toDataURL("image/png"));
+      };
+
+      if (imageUrl) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          drawText();
+        };
+        img.onerror = function () {
+          // If image fails to load, just draw text & background
+          drawText();
+        }
+        img.src = imageUrl;
+      } else {
+        drawText();
+      }
+    }
+
+    document.getElementById('imageForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const category = document.getElementById('category').value;
+      const text = document.getElementById('customText').value;
+      const position = document.getElementById('position').value;
+      const { background, font, image } = categoryStyles[category];
+
+      drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
+        window.open(dataUrl, '_blank');
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+      const category = document.getElementById('category').value;
+      const text = document.getElementById('customText').value;
+      const position = document.getElementById('position').value;
+      const { background, font, image } = categoryStyles[category];
+
+      const filenameMap = {
+        "Seinwezen": "SW.png",
+        "Kabels en Leidingen": "KenL.png",
+        "Baan": "Baan.png"
+      };
+
+      drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
+        const link = document.createElement('a');
+        link.download = filenameMap[category] || 'afbeelding.png';
+        link.href = dataUrl;
+        link.click();
+
+        // Show download message below button
+        const messageEl = document.getElementById('downloadMessage');
+        messageEl.textContent = "De afbeelding is gedownload naar je downloadmap.";
+      });
+    });
+  </script>
+</body>
+</html>
