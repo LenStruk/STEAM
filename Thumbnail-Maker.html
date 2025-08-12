@@ -143,7 +143,7 @@
       <label for="position">Tekstpositie:</label>
       <select id="position" name="position">
         <option value="Boven">Boven</option>
-		<option value="Midden" selected>Midden</option>
+        <option value="Midden" selected>Midden</option>
         <option value="Onder">Onder</option>
       </select>
 
@@ -157,157 +157,147 @@
 
   <canvas id="canvas" width="220" height="145"></canvas>
 
-	<script>
-	  const categoryStyles = {
-		"Seinwezen": {
-		  font: "302E20",
-		  background: "FDD37F",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Spoorovergang.png"
-		},
-		"Kabels en Leidingen": {
-		  font: "362935",
-		  background: "DEACDD",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/kabels-en-leidingen.png"
-		},
-		"Spoorbouw": {
-		  font: "4E594E",
-		  background: "BDD9BF",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Ballast_1.png"
-		},
-		"Bovenleiding & Draagconstructies": {
-		  font: "454D5E",
-		  background: "A2B6DF",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Bovenleiding-23.png"
-		},
-		"Lightrail": {
-		  font: "403232",
-		  background: "F7C0BD",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Metro.png"
-		},
-		"Tractie & Energievoorziening": {
-		  font: "2B3638",
-		  background: "A4D3D9",
-		  image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/tractie23.png"
-		}
-	  };
+  <script>
+    const categoryStyles = {
+      "Seinwezen": {
+        font: "302E20",
+        background: "FDD37F",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Spoorovergang.png"
+      },
+      "Kabels en Leidingen": {
+        font: "362935",
+        background: "DEACDD",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/kabels-en-leidingen.png"
+      },
+      "Spoorbouw": {
+        font: "4E594E",
+        background: "BDD9BF",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Ballast_1.png"
+      },
+      "Bovenleiding & Draagconstructies": {
+        font: "454D5E",
+        background: "A2B6DF",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Bovenleiding-23.png"
+      },
+      "Lightrail": {
+        font: "403232",
+        background: "F7C0BD",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/Metro.png"
+      },
+      "Tractie & Energievoorziening": {
+        font: "2B3638",
+        background: "A4D3D9",
+        image: "https://raw.githubusercontent.com/LenStruk/STEAM/main/tractie23.png"
+      }
+    };
 
-	  function drawOnCanvas(text, imageUrl, fontColor, backgroundColor, position, callback) {
-		const canvas = document.getElementById('canvas');
-		const ctx = canvas.getContext('2d');
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function drawOnCanvas(text, imageUrl, fontColor, backgroundColor, position, callback) {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		// Draw background color first
-		if (backgroundColor) {
-		  ctx.fillStyle = `#${backgroundColor}`;
-		  ctx.fillRect(0, 0, canvas.width, canvas.height);
-		}
+      if (backgroundColor) {
+        ctx.fillStyle = `#${backgroundColor}`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
-		const drawText = () => {
-		  if (text.trim() !== "") {
-			ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
-			ctx.font = "700 20px Montserrat, sans-serif";
-			ctx.textAlign = "center";
-			ctx.textBaseline = "top";
+      const drawText = () => {
+        if (text.trim() !== "") {
+          ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
+          ctx.font = "700 20px Montserrat, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
 
-			const maxWidth = canvas.width - 20; // leave some padding
-			const lineHeight = 24;
-			const words = text.split(/\s+/);
-			let lines = [];
-			let currentLine = words[0];
+          const maxWidth = canvas.width - 20;
+          const lineHeight = 24;
+          const words = text.split(/\s+/);
+          let lines = [];
+          let currentLine = words[0];
 
-			for (let i = 1; i < words.length; i++) {
-			  const word = words[i];
-			  const width = ctx.measureText(currentLine + " " + word).width;
-			  if (width < maxWidth) {
-				currentLine += " " + word;
-			  } else {
-				lines.push(currentLine);
-				currentLine = word;
-			  }
-			}
-			lines.push(currentLine);
+          for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+              currentLine += " " + word;
+            } else {
+              lines.push(currentLine);
+              currentLine = word;
+            }
+          }
+          lines.push(currentLine);
 
-			let startY;
-			if (position === "Boven") {
-			  startY = 10;
-			} else if (position === "Midden") {
-			  startY = (canvas.height - lines.length * lineHeight) / 2;
-			} else if (position === "Onder") {
-			  startY = canvas.height - lines.length * lineHeight - 10;
-			}
+          let startY;
+          if (position === "Boven") {
+            startY = 10;
+          } else if (position === "Midden") {
+            startY = (canvas.height - lines.length * lineHeight) / 2;
+          } else if (position === "Onder") {
+            startY = canvas.height - lines.length * lineHeight - 10;
+          }
 
-			lines.forEach((line, i) => {
-			  ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
-			});
-		  }
+          lines.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+          });
+        }
 
-		  if (callback) callback(canvas.toDataURL("image/png"));
-		};
+        if (callback) callback(canvas.toDataURL("image/jpeg", 0.9)); // JPEG instead of PNG
+      };
 
+      if (imageUrl) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          ctx.globalAlpha = 0.4;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1.0;
+          drawText();
+        };
+        img.onerror = function () {
+          drawText();
+        };
+        img.src = imageUrl;
+      } else {
+        drawText();
+      }
+    }
 
-		if (imageUrl) {
-		  const img = new Image();
-		  img.crossOrigin = "anonymous";
-		  img.onload = function () {
-			ctx.globalAlpha = 0.4; // 40% transparency
-			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-			ctx.globalAlpha = 1.0; // reset alpha
-			drawText();
-		  };
-		  img.onerror = function () {
-			drawText();
-		  };
-		  img.src = imageUrl;
-		} else {
-		  drawText();
-		}
-	  }
+    document.getElementById('imageForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const category = document.getElementById('category').value;
+      const text = document.getElementById('customText').value;
+      const position = document.getElementById('position').value;
+      const { background, font, image } = categoryStyles[category];
 
-	  document.getElementById('imageForm').addEventListener('submit', function (e) {
-		e.preventDefault();
+      drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
+        const newTab = window.open();
+        newTab.document.write(`<img src="${dataUrl}" alt="Generated Image">`);
+      });
+    });
 
-		const category = document.getElementById('category').value;
-		const text = document.getElementById('customText').value;
-		const position = document.getElementById('position').value;
-		const { background, font, image } = categoryStyles[category];
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+      const category = document.getElementById('category').value;
+      const text = document.getElementById('customText').value.trim();
+      const position = document.getElementById('position').value;
+      const { background, font, image } = categoryStyles[category];
 
-		drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
-		  const newTab = window.open();
-		  newTab.document.write(`<img src="${dataUrl}" alt="Generated Image">`);
-		});
-	  });
+      // Use text field content as filename (fallback if empty)
+      let safeFilename = text || "afbeelding";
+      safeFilename = safeFilename.replace(/[^a-z0-9_\-]/gi, "_"); // replace special chars
 
-	  document.getElementById('downloadBtn').addEventListener('click', function () {
-		const category = document.getElementById('category').value;
-		const text = document.getElementById('customText').value;
-		const position = document.getElementById('position').value;
-		const { background, font, image } = categoryStyles[category];
+      drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
+        const link = document.createElement('a');
+        link.download = safeFilename + '.jpg';
+        link.href = dataUrl;
+        link.click();
 
-		const filenameMap = {
-		  "Seinwezen": "SW.png",
-		  "Kabels en Leidingen": "KenL.png",
-		  "Spoorbouw": "Baan.png",
-		  "Bovenleiding & Draagconstructies": "Bovenleiding.png",
-		  "Lightrail": "Lightrail.png",
-		  "Tractie & Energievoorziening": "Tractie.png"
-		};
+        const messageEl = document.getElementById('downloadMessage');
+        messageEl.textContent = "De afbeelding is gedownload naar je downloadmap.";
+      });
+    });
 
-		drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
-		  const link = document.createElement('a');
-		  link.download = filenameMap[category] || 'afbeelding.png';
-		  link.href = dataUrl;
-		  link.click();
-
-		  const messageEl = document.getElementById('downloadMessage');
-		  messageEl.textContent = "De afbeelding is gedownload naar je downloadmap.";
-		});
-	  });
-
-	  // Clear textarea on page load
-	  window.addEventListener('DOMContentLoaded', () => {
-		document.getElementById('imageForm').reset();
-	  });
-	</script>
-
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('imageForm').reset();
+    });
+  </script>
 </body>
 </html>
