@@ -155,7 +155,7 @@
     </form>
   </div>
 
-  <canvas id="canvas" width="290" height="190"></canvas>
+  <canvas id="canvas" width="580" height="380"></canvas>
 
   <script>
     const categoryStyles = {
@@ -204,12 +204,12 @@
       const drawText = () => {
         if (text.trim() !== "") {
           ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
-          ctx.font = "700 20px Montserrat, sans-serif";
+          ctx.font = "700 65px Montserrat, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
 
           const maxWidth = canvas.width - 20;
-          const lineHeight = 24;
+          const lineHeight = 70;
           let lines = [];
 
           // Handle manual line breaks from textarea
