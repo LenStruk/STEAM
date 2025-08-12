@@ -155,7 +155,7 @@
     </form>
   </div>
 
-  <canvas id="canvas" width="220" height="145"></canvas>
+  <canvas id="canvas" width="290" height="190"></canvas>
 
   <script>
     const categoryStyles = {
@@ -192,81 +192,79 @@
     };
 
     function drawOnCanvas(text, imageUrl, fontColor, backgroundColor, position, callback) {
-	  const canvas = document.getElementById('canvas');
-	  const ctx = canvas.getContext('2d');
-	  ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	  if (backgroundColor) {
-		ctx.fillStyle = `#${backgroundColor}`;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-	  }
+      if (backgroundColor) {
+        ctx.fillStyle = `#${backgroundColor}`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
-	  const drawText = () => {
-		if (text.trim() !== "") {
-		  ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
-		  ctx.font = "700 20px Montserrat, sans-serif";
-		  ctx.textAlign = "center";
-		  ctx.textBaseline = "top";
+      const drawText = () => {
+        if (text.trim() !== "") {
+          ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
+          ctx.font = "700 20px Montserrat, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
 
-		  const maxWidth = canvas.width - 20;
-		  const lineHeight = 24;
-		  let lines = [];
+          const maxWidth = canvas.width - 20;
+          const lineHeight = 24;
+          let lines = [];
 
-		  // Split into paragraphs on actual line breaks
-		  const paragraphs = text.split(/\n/);
+          // Handle manual line breaks from textarea
+          const paragraphs = text.split(/\n/);
 
-		  paragraphs.forEach(paragraph => {
-			const words = paragraph.split(/\s+/);
-			let currentLine = words[0] || "";
+          paragraphs.forEach(paragraph => {
+            const words = paragraph.split(/\s+/);
+            let currentLine = words[0] || "";
+            for (let i = 1; i < words.length; i++) {
+              const word = words[i];
+              const width = ctx.measureText(currentLine + " " + word).width;
+              if (width < maxWidth) {
+                currentLine += " " + word;
+              } else {
+                lines.push(currentLine);
+                currentLine = word;
+              }
+            }
+            lines.push(currentLine);
+          });
 
-			for (let i = 1; i < words.length; i++) {
-			  const word = words[i];
-			  const width = ctx.measureText(currentLine + " " + word).width;
-			  if (width < maxWidth) {
-				currentLine += " " + word;
-			  } else {
-				lines.push(currentLine);
-				currentLine = word;
-			  }
-			}
-			lines.push(currentLine);
-		  });
+          let startY;
+          if (position === "Boven") {
+            startY = 10;
+          } else if (position === "Midden") {
+            startY = (canvas.height - lines.length * lineHeight) / 2;
+          } else if (position === "Onder") {
+            startY = canvas.height - lines.length * lineHeight - 10;
+          }
 
-		  let startY;
-		  if (position === "Boven") {
-			startY = 10;
-		  } else if (position === "Midden") {
-			startY = (canvas.height - lines.length * lineHeight) / 2;
-		  } else if (position === "Onder") {
-			startY = canvas.height - lines.length * lineHeight - 10;
-		  }
+          lines.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+          });
+        }
 
-		  lines.forEach((line, i) => {
-			ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
-		  });
-		}
+        if (callback) callback(canvas.toDataURL("image/jpeg", 0.9));
+      };
 
-		if (callback) callback(canvas.toDataURL("image/jpeg", 0.9));
-	  };
-
-	  if (imageUrl) {
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.onload = function () {
-		  ctx.globalAlpha = 0.4;
-		  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-		  ctx.globalAlpha = 1.0;
-		  drawText();
-		};
-		img.onerror = function () {
-		  drawText();
-		};
-		img.src = imageUrl;
-	  } else {
-		drawText();
-	  }
-	}
-
+      if (imageUrl) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          ctx.globalAlpha = 0.4;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1.0;
+          drawText();
+        };
+        img.onerror = function () {
+          drawText();
+        };
+        img.src = imageUrl;
+      } else {
+        drawText();
+      }
+    }
 
     document.getElementById('imageForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -287,9 +285,8 @@
       const position = document.getElementById('position').value;
       const { background, font, image } = categoryStyles[category];
 
-      // Use text field content as filename (fallback if empty)
       let safeFilename = text || "afbeelding";
-      safeFilename = safeFilename.replace(/[^a-z0-9_\-]/gi, "_"); // replace special chars
+      safeFilename = safeFilename.replace(/[^a-z0-9_\-]/gi, "_");
 
       drawOnCanvas(text, image || "", font, background, position, function (dataUrl) {
         const link = document.createElement('a');
