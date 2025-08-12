@@ -192,74 +192,81 @@
     };
 
     function drawOnCanvas(text, imageUrl, fontColor, backgroundColor, position, callback) {
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  const canvas = document.getElementById('canvas');
+	  const ctx = canvas.getContext('2d');
+	  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (backgroundColor) {
-        ctx.fillStyle = `#${backgroundColor}`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
+	  if (backgroundColor) {
+		ctx.fillStyle = `#${backgroundColor}`;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	  }
 
-      const drawText = () => {
-        if (text.trim() !== "") {
-          ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
-          ctx.font = "700 20px Montserrat, sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "top";
+	  const drawText = () => {
+		if (text.trim() !== "") {
+		  ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
+		  ctx.font = "700 20px Montserrat, sans-serif";
+		  ctx.textAlign = "center";
+		  ctx.textBaseline = "top";
 
-          const maxWidth = canvas.width - 20;
-          const lineHeight = 24;
-          const words = text.split(/\s+/);
-          let lines = [];
-          let currentLine = words[0];
+		  const maxWidth = canvas.width - 20;
+		  const lineHeight = 24;
+		  let lines = [];
 
-          for (let i = 1; i < words.length; i++) {
-            const word = words[i];
-            const width = ctx.measureText(currentLine + " " + word).width;
-            if (width < maxWidth) {
-              currentLine += " " + word;
-            } else {
-              lines.push(currentLine);
-              currentLine = word;
-            }
-          }
-          lines.push(currentLine);
+		  // Split into paragraphs on actual line breaks
+		  const paragraphs = text.split(/\n/);
 
-          let startY;
-          if (position === "Boven") {
-            startY = 10;
-          } else if (position === "Midden") {
-            startY = (canvas.height - lines.length * lineHeight) / 2;
-          } else if (position === "Onder") {
-            startY = canvas.height - lines.length * lineHeight - 10;
-          }
+		  paragraphs.forEach(paragraph => {
+			const words = paragraph.split(/\s+/);
+			let currentLine = words[0] || "";
 
-          lines.forEach((line, i) => {
-            ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
-          });
-        }
+			for (let i = 1; i < words.length; i++) {
+			  const word = words[i];
+			  const width = ctx.measureText(currentLine + " " + word).width;
+			  if (width < maxWidth) {
+				currentLine += " " + word;
+			  } else {
+				lines.push(currentLine);
+				currentLine = word;
+			  }
+			}
+			lines.push(currentLine);
+		  });
 
-        if (callback) callback(canvas.toDataURL("image/jpeg", 0.9)); // JPEG instead of PNG
-      };
+		  let startY;
+		  if (position === "Boven") {
+			startY = 10;
+		  } else if (position === "Midden") {
+			startY = (canvas.height - lines.length * lineHeight) / 2;
+		  } else if (position === "Onder") {
+			startY = canvas.height - lines.length * lineHeight - 10;
+		  }
 
-      if (imageUrl) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = function () {
-          ctx.globalAlpha = 0.4;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = 1.0;
-          drawText();
-        };
-        img.onerror = function () {
-          drawText();
-        };
-        img.src = imageUrl;
-      } else {
-        drawText();
-      }
-    }
+		  lines.forEach((line, i) => {
+			ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+		  });
+		}
+
+		if (callback) callback(canvas.toDataURL("image/jpeg", 0.9));
+	  };
+
+	  if (imageUrl) {
+		const img = new Image();
+		img.crossOrigin = "anonymous";
+		img.onload = function () {
+		  ctx.globalAlpha = 0.4;
+		  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+		  ctx.globalAlpha = 1.0;
+		  drawText();
+		};
+		img.onerror = function () {
+		  drawText();
+		};
+		img.src = imageUrl;
+	  } else {
+		drawText();
+	  }
+	}
+
 
     document.getElementById('imageForm').addEventListener('submit', function (e) {
       e.preventDefault();
