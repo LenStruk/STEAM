@@ -204,40 +204,70 @@
       const drawText = () => {
         if (text.trim() !== "") {
           ctx.fillStyle = fontColor.startsWith('#') ? fontColor : `#${fontColor}`;
-          ctx.font = "700 65px Montserrat, sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "top";
 
-          const maxWidth = canvas.width - 20;
-          const lineHeight = 70;
+          let fontSize = 65; // start big
           let lines = [];
+          const maxWidth = canvas.width - 20;
 
-          // Handle manual line breaks from textarea
-          const paragraphs = text.split(/\n/);
+          // Function to wrap text into lines based on current font size
+          function wrapLines(currentFontSize) {
+            ctx.font = `700 ${currentFontSize}px Montserrat, sans-serif`;
+            const lineHeight = currentFontSize + 5;
+            const paragraphs = text.split(/\n/);
+            let wrapped = [];
 
-          paragraphs.forEach(paragraph => {
-            const words = paragraph.split(/\s+/);
-            let currentLine = words[0] || "";
-            for (let i = 1; i < words.length; i++) {
-              const word = words[i];
-              const width = ctx.measureText(currentLine + " " + word).width;
-              if (width < maxWidth) {
-                currentLine += " " + word;
-              } else {
-                lines.push(currentLine);
-                currentLine = word;
+            paragraphs.forEach(paragraph => {
+              const words = paragraph.split(/\s+/);
+              let currentLine = words[0] || "";
+              for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = ctx.measureText(currentLine + " " + word).width;
+                if (width < maxWidth) {
+                  currentLine += " " + word;
+                } else {
+                  wrapped.push(currentLine);
+                  currentLine = word;
+                }
               }
+              wrapped.push(currentLine);
+            });
+
+            return { wrapped, lineHeight };
+          }
+
+          // Scale down font until both width & height fit
+          let fits = false;
+          while (!fits && fontSize > 20) {
+            const { wrapped, lineHeight } = wrapLines(fontSize);
+            lines = wrapped;
+
+            const longestLine = lines.reduce((a, b) =>
+              ctx.measureText(a).width > ctx.measureText(b).width ? a : b
+            , "");
+
+            const tooWide = ctx.measureText(longestLine).width > maxWidth;
+            const tooTall = lines.length * lineHeight > canvas.height - 20;
+
+            if (!tooWide && !tooTall) {
+              fits = true;
+            } else {
+              fontSize -= 2;
             }
-            lines.push(currentLine);
-          });
+          }
+
+          // ✅ Finalize font & alignment
+          ctx.font = `700 ${fontSize}px Montserrat, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "alphabetic"; // keeps text vertically aligned nicely
+          const lineHeight = fontSize + 5;
 
           let startY;
           if (position === "Boven") {
-            startY = 10;
+            startY = fontSize; 
           } else if (position === "Midden") {
-            startY = (canvas.height - lines.length * lineHeight) / 2;
+            startY = (canvas.height - lines.length * lineHeight) / 2 + fontSize;
           } else if (position === "Onder") {
-            startY = canvas.height - lines.length * lineHeight - 10;
+            startY = canvas.height - lines.length * lineHeight;
           }
 
           lines.forEach((line, i) => {
